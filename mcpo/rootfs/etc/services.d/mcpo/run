@@ -1,0 +1,31 @@
+#!/usr/bin/with-contenv bashio
+# ==============================================================================
+# Start the mcpo MCP proxy service
+# s6-overlay docs: https://github.com/just-containers/s6-overlay
+# ==============================================================================
+
+declare servers_json
+declare api_key
+
+servers_json=$(bashio::config 'servers_json')
+api_key=$(bashio::config 'api_key')
+
+if [[ -z "$servers_json" ]]; then
+    bashio::log.error "No MCP servers configured. Fill in the 'MCP Servers JSON' option."
+    exit 1
+fi
+
+# Validate JSON
+if ! echo "$servers_json" | jq empty 2>/dev/null; then
+    bashio::log.error "Invalid JSON in Servers JSON configuration"
+    exit 1
+fi
+
+echo "{\"mcpServers\": $(echo "$servers_json" | jq .)}" > /data/mcpo-config.json
+bashio::log.info "Wrote MCP servers config to /data/mcpo-config.json"
+
+server_count=$(echo "$servers_json" | jq 'length')
+bashio::log.info "Configured MCPO with $server_count MCP server(s)"
+
+bashio::log.info "Starting mcpo on port 8000..."
+exec mcpo --config /data/mcpo-config.json --port 8000 ${api_key:+--api-key "$api_key"}

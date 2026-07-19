@@ -1,0 +1,7 @@
+configuration:
+  servers_json:
+    name: MCP Servers JSON
+    description: 'JSON object defining MCP servers. See the app docs for supported format (stdio commands, SSE, streamable-http).'
+  api_key:
+    name: API Key
+    description: 'Optional API key to authenticate requests. Leave empty to disable authentication.'

@@ -1,0 +1,31 @@
+# https://developers.home-assistant.io/docs/apps/configuration#app-configuration
+name: mcpo MCP Proxy
+version: "1.0.0"
+slug: mcpo
+description: >-
+  Run the MCP-to-OpenAPI Proxy Server (MCPO) to expose MCP tool servers as HTTP endpoints for Open WebUI instances.
+url: "https://github.com/mcpo-community/mcpo-hass-app/tree/main/mcpo"
+arch:
+  - aarch64
+  - amd64
+init: false
+ports:
+  "8000/tcp":
+
+ports_description:
+  "8000/tcp": MCPO proxy port for Open WebUI to connect
+map:
+  - share:rw
+options:
+  servers_json: |
+    {
+      "memory": {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-memory"]
+      }
+    }
+  api_key: ""
+schema:
+  servers_json: "str?"
+  api_key: "str?"
+image: "ghcr.io/mcpo-community/mcpo-hass-app"
