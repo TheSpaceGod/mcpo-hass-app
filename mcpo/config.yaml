@@ -28,4 +28,4 @@ options:
 schema:
   servers_json: "str?"
   api_key: "str?"
-image: "ghcr.io/TheSpaceGod/mcpo-hass-app"
+image: "ghcr.io/thespacegod/mcpo-hass-app"

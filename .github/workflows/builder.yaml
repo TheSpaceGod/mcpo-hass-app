@@ -7,8 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  ARCHITECTURES: '["amd64", "aarch64"]'
-  IMAGE_NAME: mcpo-hass-app
+  APP_DIR: mcpo
 
 permissions:
   contents: read
@@ -18,18 +17,45 @@ jobs:
     name: Initialize build
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.matrix.outputs.matrix }}
+      architectures: ${{ steps.info.outputs.architectures }}
+      build_matrix: ${{ steps.matrix.outputs.matrix }}
+      image_name: ${{ steps.normalize.outputs.image_name }}
+      registry_prefix: ${{ steps.normalize.outputs.registry_prefix }}
+      name: ${{ steps.normalize.outputs.name }}
+      description: ${{ steps.normalize.outputs.description }}
+      url: ${{ steps.normalize.outputs.url }}
     steps:
       - name: Check out code from GitHub
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7.0.0
+
+      - name: Get app information
+        id: info
+        uses: home-assistant/actions/helpers/info@master
+        with:
+          path: "./${{ env.APP_DIR }}"
+
+      - name: Normalize app information
+        id: normalize
+        run: |
+          image=${{ steps.info.outputs.image }}
+          echo "image_name=${image##*/}" >> "$GITHUB_OUTPUT"
+          echo "registry_prefix=${image%/*}" >> "$GITHUB_OUTPUT"
+          name=${{ steps.info.outputs.name }}
+          echo "name=${name}" >> "$GITHUB_OUTPUT"
+          description=${{ steps.info.outputs.description }}
+          echo "description=${description}" >> "$GITHUB_OUTPUT"
+          url=${{ steps.info.outputs.url }}
+          if [[ -n "$url" && "$url" != "null" ]]; then
+            echo "url=${url}" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Prepare build matrix
         id: matrix
         uses: home-assistant/builder/actions/prepare-multi-arch-matrix@2026.06.0
         with:
-          architectures: ${{ env.ARCHITECTURES }}
-          image-name: ${{ env.IMAGE_NAME }}
-          registry-prefix: ghcr.io/thespacegod
+          architectures: ${{ steps.info.outputs.architectures }}
+          image-name: ${{ steps.normalize.outputs.image_name }}
+          registry-prefix: ${{ steps.normalize.outputs.registry_prefix }}
 
   build:
     name: Build ${{ matrix.arch }} image
@@ -41,16 +67,18 @@ jobs:
       id-token: write
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson(needs.init.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.init.outputs.build_matrix) }}
     steps:
       - name: Check out code from GitHub
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7.0.0
+        with:
+          persist-credentials: false
 
       - name: Build and push image
         uses: home-assistant/builder/actions/build-image@2026.06.0
         with:
           arch: ${{ matrix.arch }}
-          context: ./mcpo
+          context: "./${{ env.APP_DIR }}"
           container-registry-password: ${{ secrets.GITHUB_TOKEN }}
           cosign-base-identity: "https://github.com/home-assistant/.*/.*"
           cosign-base-issuer: https://token.actions.githubusercontent.com
@@ -59,6 +87,11 @@ jobs:
           image-tags: |
             ${{ github.ref_name }}
             latest
+          labels: |
+            io.hass.type=app
+            io.hass.name=${{ needs.init.outputs.name }}
+            io.hass.description=${{ needs.init.outputs.description }}
+            ${{ needs.init.outputs.url && format('io.hass.url={0}', needs.init.outputs.url) || '' }}
           push: "true"
           version: ${{ github.ref_name }}
 
@@ -73,10 +106,10 @@ jobs:
       - name: Publish multi-arch manifest
         uses: home-assistant/builder/actions/publish-multi-arch-manifest@2026.06.0
         with:
-          architectures: ${{ env.ARCHITECTURES }}
+          architectures: ${{ needs.init.outputs.architectures }}
           container-registry-password: ${{ secrets.GITHUB_TOKEN }}
-          image-name: ${{ env.IMAGE_NAME }}
-          registry-prefix: ghcr.io/thespacegod
+          image-name: ${{ needs.init.outputs.image_name }}
           image-tags: |
             ${{ github.ref_name }}
             latest
+          registry-prefix: ${{ needs.init.outputs.registry_prefix }}
