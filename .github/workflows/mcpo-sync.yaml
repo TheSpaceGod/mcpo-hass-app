@@ -1,0 +1,73 @@
+name: Sync MCPO Version
+
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+    inputs:
+      force:
+        description: Force sync even if version already matches
+        required: false
+        default: "false"
+
+env:
+  APP_DIR: mcpo
+  UPSTREAM_REPO: open-webui/mcpo
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    name: Check for new MCPO release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v7.0.0
+        with:
+          persist-credentials: true
+
+      - name: Get latest upstream MCPO release version
+        id: upstream_version
+        run: |
+          LATEST_TAG=$(curl -s "https://api.github.com/repos/${{ env.UPSTREAM_REPO }}/releases/latest" | jq -r '.tag_name')
+          echo "Version from tag: ${LATEST_TAG}"
+          CLEANED=${LATEST_TAG#v}
+          echo "version=${CLEANED}" >> "$GITHUB_OUTPUT"
+
+      - name: Get current MCPO version from config
+        id: current_version
+        run: |
+          CURRENT=$(sed -n 's/^version: *"\([0-9.]*\)".*$/\1/p' "${{ env.APP_DIR }}/config.yaml")
+          echo "Current config version: ${CURRENT}"
+          echo "version=${CURRENT}" >> "$GITHUB_OUTPUT"
+
+      - name: Compare versions and patch files if needed
+        id: patch
+        run: |
+          NEW_VER="${{ steps.upstream_version.outputs.version }}"
+          CUR_VER="${{ steps.current_version.outputs.version }}"
+          FORCE="${{ github.event.inputs.force || 'false' }}"
+          CONFIG_PATH="${{ env.APP_DIR }}/config.yaml"
+          DOCKERFILE_PATH="${{ env.APP_DIR }}/Dockerfile"
+
+          if [[ "$FORCE" != "true" && "$NEW_VER" == "$CUR_VER" ]]; then
+            echo "Versions match. No update needed."
+            exit 0
+          fi
+
+          sed -i "/^version: /s/version:.*/version: \"${NEW_VER}\"/" "$CONFIG_PATH"
+          sed -i "s|pip install uv mcpo[==].*--break-system-packages|pip install uv mcpo==${NEW_VER} --break-system-packages|" "$DOCKERFILE_PATH"
+
+          echo "Patched config and Dockerfile to ${NEW_VER}"
+          echo "new_version=${NEW_VER}" >> "$GITHUB_OUTPUT"
+
+      - name: Commit and push changes
+        if: steps.patch.outputs.new_version != ''
+        run: |
+          NEW_VER="${{ steps.patch.outputs.new_version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add ${{ env.APP_DIR }}/config.yaml ${{ env.APP_DIR }}/Dockerfile
+          git commit -m "Bump MCPO to v${NEW_VER}" || exit 0
+          git push origin main

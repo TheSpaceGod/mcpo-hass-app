@@ -9,7 +9,7 @@ RUN apk add --no-cache \
   npm \
   jq \
   curl \
-  && pip install uv mcpo --break-system-packages \
+  && pip install uv mcpo==0.0.20 --break-system-packages \
   && rm -rf /var/cache/apk/*
 
 COPY rootfs /
