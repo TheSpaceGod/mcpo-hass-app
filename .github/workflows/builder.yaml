@@ -29,6 +29,7 @@ jobs:
         with:
           architectures: ${{ env.ARCHITECTURES }}
           image-name: ${{ env.IMAGE_NAME }}
+          registry-prefix: ghcr.io/thespacegod
 
   build:
     name: Build ${{ matrix.arch }} image
@@ -75,6 +76,7 @@ jobs:
           architectures: ${{ env.ARCHITECTURES }}
           container-registry-password: ${{ secrets.GITHUB_TOKEN }}
           image-name: ${{ env.IMAGE_NAME }}
+          registry-prefix: ghcr.io/thespacegod
           image-tags: |
             ${{ github.ref_name }}
             latest
