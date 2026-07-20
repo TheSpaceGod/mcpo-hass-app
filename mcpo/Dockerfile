@@ -2,17 +2,15 @@
 ARG BUILD_FROM=ghcr.io/home-assistant/base:3.23
 FROM ${BUILD_FROM}
 
-RUN \
-    apk add --no-cache \
-        python3 \
-        py3-pip \
-        nodejs \
-        npm \
-        jq \
-        curl \
-    && curl -LsSf https://get.pip.io/get-pip.py | python3 \
-    && pip install uv mcpo --break-system-packages \
-    && rm -rf /var/cache/apk/*
+RUN apk add --no-cache \
+  python3 \
+  py3-pip \
+  nodejs \
+  npm \
+  jq \
+  curl \
+  && pip install uv mcpo --break-system-packages \
+  && rm -rf /var/cache/apk/*
 
 COPY rootfs /
 

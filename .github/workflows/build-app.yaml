@@ -25,6 +25,6 @@ jobs:
             --test
             --dir ./mcpo
             --compress zstd
-            --addons-url https://github.com/mcpo-community/mcpo-hass-app
+            --addons-url https://github.com/TheSpaceGod/mcpo-hass-app
             --target /tmp/mcpo
           publish: ${{ inputs.publish }}

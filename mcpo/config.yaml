@@ -4,7 +4,7 @@ version: "1.0.0"
 slug: mcpo
 description: >-
   Run the MCP-to-OpenAPI Proxy Server (MCPO) to expose MCP tool servers as HTTP endpoints for Open WebUI instances.
-url: "https://github.com/mcpo-community/mcpo-hass-app/tree/main/mcpo"
+url: "https://github.com/TheSpaceGod/mcpo-hass-app/tree/main/mcpo"
 arch:
   - aarch64
   - amd64
