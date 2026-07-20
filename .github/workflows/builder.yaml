@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - "v*"
+      - "mcpo-*"
   workflow_dispatch:
 
 env:
@@ -24,6 +25,7 @@ jobs:
       name: ${{ steps.normalize.outputs.name }}
       description: ${{ steps.normalize.outputs.description }}
       url: ${{ steps.normalize.outputs.url }}
+      version: ${{ steps.info.outputs.version }}
     steps:
       - name: Check out code from GitHub
         uses: actions/checkout@v7.0.0
@@ -110,6 +112,6 @@ jobs:
           container-registry-password: ${{ secrets.GITHUB_TOKEN }}
           image-name: ${{ needs.init.outputs.image_name }}
           image-tags: |
-            ${{ github.ref_name }}
+            ${{ needs.init.outputs.version }}
             latest
           registry-prefix: ${{ needs.init.outputs.registry_prefix }}
