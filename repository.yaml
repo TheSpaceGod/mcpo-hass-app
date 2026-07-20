@@ -1,4 +1,4 @@
 # https://developers.home-assistant.io/docs/apps/repository#repository-configuration
 name: MCPO Home Assistant App Repository
-url: 'https://github.com/mcpo-community/mcpo-hass-app'
-maintainer: mcpo-community
+url: 'https://github.com/TheSpaceGod/mcpo-hass-app'
+maintainer: TheSpaceGod
