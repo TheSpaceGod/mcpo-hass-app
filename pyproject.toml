@@ -1,0 +1,13 @@
+[project]
+name = "mcpo-hass-app-tests"
+version = "0.1.0"
+requires-python = ">=3.12"
+
+[project.dev-dependencies]
+pytest = "^8.0"
+docker = "^7.0"
+requests = "^2.32"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+log_cli_level = "INFO"
