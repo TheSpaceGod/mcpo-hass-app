@@ -87,7 +87,7 @@ jobs:
           cosign-base-verify: ghcr.io/home-assistant/base:3.23
           image: ${{ matrix.image }}
           image-tags: |
-            ${{ github.ref_name }}
+            ${{ needs.init.outputs.version }}
             latest
           labels: |
             io.hass.type=app
