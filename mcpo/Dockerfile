@@ -17,5 +17,5 @@ COPY rootfs /
 LABEL \
     org.opencontainers.image.title="Home Assistant App: mcpo MCP Proxy" \
     org.opencontainers.image.description="Expose MCP tools as OpenAPI HTTP endpoints for Open WebUI." \
-    org.opencontainers.image.source="https://github.com/mcpo-community/mcpo-hass-app" \
+    org.opencontainers.image.source="https://github.com/TheSpaceGod/mcpo-hass-app" \
     org.opencontainers.image.licenses="MIT"
