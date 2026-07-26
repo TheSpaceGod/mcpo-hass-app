@@ -2,9 +2,7 @@ name: Build & Publish App
 
 on:
   push:
-    branches: [main]
     tags:
-      - "v*"
       - "mcpo-*"
   workflow_dispatch:
 

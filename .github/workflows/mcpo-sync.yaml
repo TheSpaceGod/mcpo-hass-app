@@ -62,7 +62,7 @@ jobs:
           echo "Patched config and Dockerfile to ${NEW_VER}"
           echo "new_version=${NEW_VER}" >> "$GITHUB_OUTPUT"
 
-      - name: Commit and push changes
+      - name: Tag and push changes
         if: steps.patch.outputs.new_version != ''
         run: |
           NEW_VER="${{ steps.patch.outputs.new_version }}"
@@ -70,4 +70,5 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add ${{ env.APP_DIR }}/config.yaml ${{ env.APP_DIR }}/Dockerfile
           git commit -m "Bump MCPO to v${NEW_VER}" || exit 0
-          git push origin main
+          git tag "mcpo-${NEW_VER}"
+          git push origin main --tags
