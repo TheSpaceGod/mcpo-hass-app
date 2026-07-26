@@ -9,7 +9,7 @@ arch:
   - amd64
 init: false
 ports:
-  "8000/tcp":
+  "8000/tcp": 8000
 
 ports_description:
   "8000/tcp": MCPO proxy port for Open WebUI to connect
