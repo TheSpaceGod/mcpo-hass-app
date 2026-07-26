@@ -1,5 +1,11 @@
 name: Build & Publish App
 
+# Tag triggers (normal flow):
+# mcpo-sync creates a mcpo-{ver} tag when it bumps MCPO. That tag push fires this builder.
+# Manual dispatch (fallback):
+# Use workflow_dispatch to rebuild if a tag trigger fails, or an existing tag needs re-publishing.
+# See docs/DEVELOPER.md for details on tagging scheme and troubleshooting.
+
 on:
   push:
     tags:

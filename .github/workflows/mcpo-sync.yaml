@@ -1,5 +1,9 @@
 name: Sync MCPO Version
 
+# Checks upstream MCPO releases daily.
+# When new version detected it patches mcpo/config.yaml + Dockerfile, tags commit with `mcpo-{ver}`, then pushes to main.
+# Tags are meant to fire builder.yaml automatically. See docs/DEVELOPER.md for full pipeline overview.
+
 on:
   schedule:
     - cron: "0 6 * * *"
